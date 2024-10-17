@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 @Service
 public class ProductService implements IProductService{
@@ -39,12 +42,15 @@ public class ProductService implements IProductService{
         pR.deleteById(id);
     }
 
+
     @Override
-    public ResponseEntity<Object> updateProduct(Long id, Product product) {
+    public ResponseEntity<Object> updateProduct(Long id, Map<String, Object> fields) {
+
         HashMap<String, Object> datos = new HashMap<String, Object>();
 
-        boolean productExist = pR.existsById(id);
-        if(!productExist){
+        Optional<Product> productOptional = pR.findById(id);
+
+        if(productOptional.isEmpty()){
             datos.put("update", "fail");
             datos.put("cause", "product doesn't exits");
             return new ResponseEntity<>(
@@ -52,13 +58,18 @@ public class ProductService implements IProductService{
                     HttpStatus.CONFLICT
             );
         }else{
+            Product productExists = productOptional.get();
+            fields.forEach((key, value) -> {
+                Field field = ReflectionUtils.findField(Product.class, key);
+                if (field != null) {
+                    field.setAccessible(true);
+                    ReflectionUtils.setField(field, productExists, value);
+                }
+            });
+            pR.save(productExists);
             datos.put("update", "success");
-            datos.put("product", product);
-            this.createProduct(product);
-            return new ResponseEntity<>(
-                    datos,
-                    HttpStatus.OK
-            );
+            datos.put("product updated", productExists );
+            return new ResponseEntity<>(datos, HttpStatus.OK);
         }
     }
 }

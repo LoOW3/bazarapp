@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -35,9 +36,9 @@ public class SaleController {
         return ResponseEntity.ok("successfully deleted");
     }
 
-    @PutMapping("/ventas/editar/{id}")
+    @PatchMapping("/ventas/editar/{id}")
     public ResponseEntity<Object> editSale(@PathVariable Long id,
-                                             @RequestBody Sale sale){
-        return sS.updateSale(id, sale);
+                                             @RequestBody Map<String, Object> fields){
+        return sS.updateSale(id, fields);
     }
 }

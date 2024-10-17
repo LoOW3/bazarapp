@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.lang.reflect.Field;
+import java.util.*;
+
 @Service
 public class SaleService implements ISaleService{
     @Autowired
@@ -80,11 +80,13 @@ public class SaleService implements ISaleService{
     }
 
     @Override
-    public ResponseEntity<Object> updateSale(Long id, Sale sale) {
+    public ResponseEntity<Object> updateSale(Long id, Map<String, Object> fields) {
+
         HashMap<String, Object> datos = new HashMap<String, Object>();
 
-        boolean saleExists = sR.existsById(id);
-        if(!saleExists){
+        Optional<Sale> saleOptional = sR.findById(id);
+
+        if(saleOptional.isEmpty()){
             datos.put("update", "fail");
             datos.put("cause", "sale doesn't exits");
             return new ResponseEntity<>(
@@ -92,13 +94,18 @@ public class SaleService implements ISaleService{
                     HttpStatus.CONFLICT
             );
         }else{
+            Product saleExists = saleOptional.get();
+            fields.forEach((key, value) -> {
+                Field field = ReflectionUtils.findField(Product.class, key);
+                if (field != null) {
+                    field.setAccessible(true);
+                    ReflectionUtils.setField(field, saleExists, value);
+                }
+            });
+            pR.save(saleExists);
             datos.put("update", "success");
-            datos.put("sale", sale);
-            this.createSale(sale);
-            return new ResponseEntity<>(
-                    datos,
-                    HttpStatus.OK
-            );
+            datos.put("sale updated", saleExists );
+            return new ResponseEntity<>(datos, HttpStatus.OK);
         }
     }
 

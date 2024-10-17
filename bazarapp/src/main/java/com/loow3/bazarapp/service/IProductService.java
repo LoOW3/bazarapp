@@ -4,6 +4,7 @@ import com.loow3.bazarapp.model.Product;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface IProductService {
@@ -11,5 +12,5 @@ public interface IProductService {
     public List<Product> listProducts();
     public void createProduct(Product product);
     public void deleteProduct(Long id);
-    public ResponseEntity<Object> updateProduct(Long id, Product product);
+    public ResponseEntity<Object> updateProduct(Long id, Map<String, Object> fields);
 }

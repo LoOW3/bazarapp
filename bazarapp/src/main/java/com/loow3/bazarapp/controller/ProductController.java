@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,9 +37,9 @@ public class ProductController {
         return ResponseEntity.ok("successfully deleted");
     }
 
-    @PutMapping("/productos/editar/{id}")
+    @PatchMapping("/productos/editar/{id}")
     public ResponseEntity<Object> editProduct(@PathVariable Long id,
-                                               @RequestBody Product product){
-        return pS.updateProduct(id, product);
+                                               @RequestBody Map<String, Object> fields){
+        return pS.updateProduct(id, fields);
     }
 }
