@@ -31,6 +31,12 @@ public class ProductController {
         return ResponseEntity.ok(pS.getProduct(id));
     }
 
+    @GetMapping("/productos/falta_stock")
+    public ResponseEntity<Object> getLowStock(){
+
+        return pS.getLowStock();
+    }
+
     @DeleteMapping("/productos/eliminar/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable Long id){
         pS.deleteProduct(id);

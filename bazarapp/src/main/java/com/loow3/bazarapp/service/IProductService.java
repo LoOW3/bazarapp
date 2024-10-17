@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface IProductService {
     public Optional<Product> getProduct(Long id);
     public List<Product> listProducts();
+    public ResponseEntity<Object> getLowStock();
     public void createProduct(Product product);
     public void deleteProduct(Long id);
     public ResponseEntity<Object> updateProduct(Long id, Map<String, Object> fields);

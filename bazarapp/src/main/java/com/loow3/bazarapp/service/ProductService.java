@@ -9,10 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
 @Service
 public class ProductService implements IProductService{
     @Autowired
@@ -26,6 +24,25 @@ public class ProductService implements IProductService{
     @Override
     public List<Product> listProducts() {
         return pR.findAll();
+    }
+
+    @Override
+    public ResponseEntity<Object> getLowStock() {
+        HashMap<String, Object> datos = new HashMap<String, Object>();
+        List<Product> products = this.listProducts();
+        List<Product> lowStockProducts = new ArrayList<Product>();
+
+        for(Product product : products){
+            if(product.getQtyLeft() < 5){
+                lowStockProducts.add(product);
+            }
+        }
+        datos.put("status", "ok");
+        datos.put("low_stock", lowStockProducts);
+        return new ResponseEntity<>(
+                datos,
+                HttpStatus.FOUND
+        );
     }
 
     @Override

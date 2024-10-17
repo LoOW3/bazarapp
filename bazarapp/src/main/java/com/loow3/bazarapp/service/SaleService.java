@@ -94,7 +94,7 @@ public class SaleService implements ISaleService{
                     HttpStatus.CONFLICT
             );
         }else{
-            Product saleExists = saleOptional.get();
+            Sale saleExists = saleOptional.get();
             fields.forEach((key, value) -> {
                 Field field = ReflectionUtils.findField(Product.class, key);
                 if (field != null) {
@@ -102,7 +102,7 @@ public class SaleService implements ISaleService{
                     ReflectionUtils.setField(field, saleExists, value);
                 }
             });
-            pR.save(saleExists);
+            sR.save(saleExists);
             datos.put("update", "success");
             datos.put("sale updated", saleExists );
             return new ResponseEntity<>(datos, HttpStatus.OK);
