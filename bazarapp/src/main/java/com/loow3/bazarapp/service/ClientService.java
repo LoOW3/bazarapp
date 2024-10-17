@@ -6,9 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 @Service
 public class ClientService implements IClientService{
@@ -40,11 +43,13 @@ public class ClientService implements IClientService{
     }
 
     @Override
-    public ResponseEntity<Object> updateClient(Long id, Client client) {
+    public ResponseEntity<Object> updateClient(Long id, Map<String, Object> fields) {
+
         HashMap<String, Object> datos = new HashMap<String, Object>();
 
-        boolean clientExists = pR.existsById(id);
-        if(!clientExists){
+        Optional<Client> clientOptional = pR.findById(id);
+
+        if(clientOptional.isEmpty()){
             datos.put("update", "fail");
             datos.put("cause", "client doesn't exits");
             return new ResponseEntity<>(
@@ -52,13 +57,18 @@ public class ClientService implements IClientService{
                     HttpStatus.CONFLICT
             );
         }else{
+            Client clientExists = clientOptional.get();
+            fields.forEach((key, value) -> {
+                Field field = ReflectionUtils.findField(Client.class, key);
+                if (field != null) {
+                    field.setAccessible(true);
+                    ReflectionUtils.setField(field, clientExists, value);
+                }
+            });
+            pR.save(clientExists);
             datos.put("update", "success");
-            datos.put("client", client);
-            this.createClient(client);
-            return new ResponseEntity<>(
-                    datos,
-                    HttpStatus.OK
-            );
+            datos.put("client updated", clientExists );
+            return new ResponseEntity<>(datos, HttpStatus.OK);
         }
     }
 

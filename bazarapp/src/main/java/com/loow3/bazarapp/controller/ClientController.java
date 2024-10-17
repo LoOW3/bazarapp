@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -36,9 +37,9 @@ public class ClientController {
         return ResponseEntity.ok("successfully deleted");
     }
 
-    @PutMapping("/clientes/editar/{id}")
+    @PatchMapping("/clientes/editar/{id}")
     public ResponseEntity<Object> editClient(@PathVariable Long id,
-                                              @RequestBody Client client){
-        return pS.updateClient(id, client);
+                                              @RequestBody Map<String, Object> fields){
+        return pS.updateClient(id, fields);
     }
 }
