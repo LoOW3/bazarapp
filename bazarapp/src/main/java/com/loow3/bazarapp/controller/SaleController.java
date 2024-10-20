@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +31,26 @@ public class SaleController {
     public ResponseEntity<Optional<Sale>> getSale(@PathVariable Long id){
         return ResponseEntity.ok(sS.getSale(id));
     }
+    @GetMapping("/ventas/productos/{codigo_venta}")
+    public ResponseEntity<Object> getSaleProducts(@PathVariable Long codigo_venta){
+        return sS.getSaleProducts(codigo_venta);
+    }
+    @GetMapping("/ventas/date")
+    public ResponseEntity<Object> getTotalAmountsSale(@RequestParam("fecha_venta") String fecha_venta) {
+        LocalDate localDate;
+        try {
+            localDate = LocalDate.parse(fecha_venta);
+        } catch (DateTimeParseException e) {
+            return ResponseEntity.badRequest().body("Invalid date format. Please use 'yyyy-MM-dd'.");
+        }
 
+        return sS.getTotalAmountsSale(localDate);
+    }
+
+    @GetMapping("/ventas/mayor_venta")
+    public ResponseEntity<Object> getMayorSale(){
+        return sS.getMayorSale();
+    }
     @DeleteMapping("/ventas/eliminar/{id}")
     public ResponseEntity<String> deleteSale(@PathVariable Long id){
         sS.deleteSale(id);

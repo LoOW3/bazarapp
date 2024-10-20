@@ -1,9 +1,10 @@
 package com.loow3.bazarapp.service;
 
+import com.loow3.bazarapp.dto.SaleDTO;
+import com.loow3.bazarapp.model.TotalAmountSale;
 import com.loow3.bazarapp.model.Product;
 import com.loow3.bazarapp.model.Sale;
 import com.loow3.bazarapp.repository.IProductRepository;
-import com.loow3.bazarapp.repository.ISaleRepository;
 import com.loow3.bazarapp.repository.ISaleRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -108,5 +110,83 @@ public class SaleService implements ISaleService{
             return new ResponseEntity<>(datos, HttpStatus.OK);
         }
     }
+
+    @Override
+    public ResponseEntity<Object> getSaleProducts(Long codigoVenta) {
+        HashMap<String, Object> datos = new HashMap<String, Object>();
+        Optional<Sale> sale = sR.findById(codigoVenta);
+
+        if(sale.isEmpty()){
+            datos.put("error", "Sale with ID " + codigoVenta + " doesn't exist");
+            return new ResponseEntity<>(datos, HttpStatus.NOT_FOUND);
+        }
+            datos.put("status", "success");
+            datos.put("sale", sale);
+
+        return new ResponseEntity<>(datos, HttpStatus.FOUND);
+    }
+
+    @Override
+    public ResponseEntity<Object> getTotalAmountsSale(LocalDate fecha_venta) {
+        HashMap<String, Object> datos = new HashMap<String, Object>();
+        TotalAmountSale totAmountS = new TotalAmountSale();
+        List<Sale> itermidiateSaleList = new ArrayList<Sale>();
+        List<Sale> listSales = sR.findAll();
+
+        for(Sale sale : listSales){
+            if(sale.getSaleDate().equals(fecha_venta)){
+                itermidiateSaleList.add(sale);
+            }
+        }
+
+        for(Sale sale : itermidiateSaleList){
+            totAmountS.setTotalAmountSale(totAmountS.getTotalAmountSale() + sale.getTotal());
+            totAmountS.setTotalSales(totAmountS.getTotalSales() + 1);
+        }
+
+        datos.put("Total amount", totAmountS.getTotalAmountSale());
+        datos.put("Total sales", totAmountS.getTotalSales());
+        return new ResponseEntity<>(
+                datos,
+                HttpStatus.OK
+        );
+    }
+
+    @Override
+    public ResponseEntity<Object> getMayorSale() {
+        HashMap<String, Object> datos = new HashMap<String, Object>();
+        List<Sale> sales = sR.findAll();
+
+        SaleDTO mayorSale = new SaleDTO();
+
+        Sale maxSale = new Sale();
+
+        for(Sale sale : sales){
+            if(sale.getTotal() > maxSale.getTotal()){
+                maxSale = sale;
+            }
+
+        }
+        if(maxSale.getId() != -1){
+            int totProducts = 0;
+            for(Product product: maxSale.getListProducts()){
+                totProducts =+ 1;
+            }
+            mayorSale.setSaleID(maxSale.getId());
+            mayorSale.setTotal(maxSale.getTotal());
+            mayorSale.setClientName(maxSale.getClient().getName());
+            mayorSale.setClientLastName(maxSale.getClient().getLastName());
+            mayorSale.setTotalProducts(totProducts);
+        }
+
+        datos.put("status", "success");
+        datos.put("max_sale", mayorSale);
+        return new ResponseEntity<>(
+                datos,
+                HttpStatus.FOUND
+                );
+    }
+
+
 
 }

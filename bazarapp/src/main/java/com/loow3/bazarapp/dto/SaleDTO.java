@@ -14,6 +14,9 @@ public class SaleDTO {
     private String clientName;
     private String clientLastName;
 
+    public SaleDTO() {
+    }
+
     public SaleDTO(Long saleID, double total, int totalProducts, String clientLastName, String clientName) {
         this.saleID = saleID;
         this.total = total;

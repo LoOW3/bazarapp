@@ -15,9 +15,14 @@ public class Sale {
     private Long id;
     private LocalDate saleDate;
     private double total;
-    @OneToMany
+    @ManyToMany
+    @JoinTable(
+            name = "sale_product",
+            joinColumns = @JoinColumn(name = "sale_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
     private List<Product> listProducts;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "clientID", referencedColumnName = "id")
     private Client client;
 
@@ -29,6 +34,7 @@ public class Sale {
     }
 
     public Sale() {
+        this.total = 0;
     }
 
     public Sale(Long id, LocalDate saleDate, double total, Client client, List<Product> listProducts) {
